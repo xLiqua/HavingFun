@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local lp = Players.LocalPlayer
 local guiParent = gethui and gethui() or lp:WaitForChild("PlayerGui")
+local enemyFolder = workspace:WaitForChild("Enemies"):WaitForChild(lp.Name)
 
 local existingGui = guiParent:FindFirstChild("PeanutCustomUI")
 if existingGui then
@@ -165,6 +166,22 @@ local function getBestUnlockedZone(data)
 
     return "Spawn"
 end
+
+local function tpToEnemy(enemy)
+    local part = enemy.PrimaryPart or enemy:FindFirstChildWhichIsA("BasePart", true)
+    if not part then return end
+
+    local hrp = getHRP()
+    if hrp then
+        hrp.CFrame = part.CFrame + Vector3.new(0, 3, 0)
+    end
+end
+
+enemyFolder.ChildAdded:Connect(function(enemy)
+    if Settings.AutoTPEnemies then
+        tpToEnemy(enemy)
+    end
+end)
 
 local TP_THRESHOLD = 20
 
@@ -327,6 +344,20 @@ Main:CreateToggle({
     CurrentValue = false,
     Callback = function(v)
         Settings.AutoCollect = v
+    end
+})
+
+Main:CreateToggle({
+    Name = "Auto TP Enemies",
+    CurrentValue = false,
+    Callback = function(v)
+        Settings.AutoTPEnemies = v
+
+        if v then
+            for _, enemy in ipairs(enemyFolder:GetChildren()) do
+                tpToEnemy(enemy)
+            end
+        end
     end
 })
 
