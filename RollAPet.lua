@@ -32,7 +32,7 @@ local CustomUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/xLiq
 local DataClient = require(ReplicatedStorage.Packages.dataservice).client
 
 local Settings = {
-    AutoRoll = true,
+    AutoRoll = false,
     AutoRebirth = false,
     AutoBuyZones = true,
     AutoCollect = false
@@ -281,7 +281,7 @@ local Main = Window:CreateTab("Main")
 
 Main:CreateToggle({
     Name = "Auto Roll",
-    CurrentValue = true,
+    CurrentValue = false,
     Callback = function(v)
         Settings.AutoRoll = v
     end
