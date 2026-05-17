@@ -39,9 +39,9 @@ local Settings = {
 }
 
 if game.Players.LocalPlayer.Name == "ShowayZ" then
-    AutoRoll = true,
-    AutoBuyZones = true,
-    AutoCollect = true
+    Settings.AutoRoll = true
+    Settings.AutoBuyZones = true
+    Settings.AutoCollect = true
 end
 
 local Zones = {
