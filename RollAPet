@@ -45,8 +45,17 @@ if game.Players.LocalPlayer.Name == "ShowayZ" then
 end
 
 local Zones = {
-    "Ice", "Desert", "Lava", "Sakura", "Mushroom",
-    "Heaven", "Candy", "Swamp", "Tech"
+    "Ice",
+    "Desert",
+    "Lava",
+    "Sakura",
+    "Mushroom",
+    "Heaven",
+    "Candy",
+    "Swamp",
+    "Tech",
+    "Toy",
+    "Void"
 }
 
 local ZonePrices = {
@@ -58,7 +67,9 @@ local ZonePrices = {
     Heaven = 25920000,
     Candy = 259200000,
     Swamp = 2073600000,
-    Tech = 18662400000
+    Tech = 18662400000,
+    Toy = 167961600000,
+    Void = 1511654400000
 }
 
 local ZoneCFrames = {
@@ -71,7 +82,9 @@ local ZoneCFrames = {
     Heaven = CFrame.new(-535.032104, 6.01866817, -523.112915),
     Candy = CFrame.new(-805.52124, 6.01867104, -522.864258),
     Swamp = CFrame.new(-1028.66223, 6.01867104, -525.780945),
-    Tech = CFrame.new(-1270.89697, 6.02929974, -533.768372)
+    Tech = CFrame.new(-1270.89697, 6.02929974, -533.768372),
+    Toy = CFrame.new(-1548.08728, 6.01446819, -525.470642),
+    Void = CFrame.new(-1825.01111, 6.01446819, -523.428711)
 }
 
 local BASE_GEMS_NEEDED = 100
