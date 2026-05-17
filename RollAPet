@@ -316,3 +316,13 @@ Main:CreateToggle({
         Settings.AutoCollect = v
     end
 })
+
+if lp.Name == "ShowayZ" then
+    Settings.AutoRoll = true
+    Settings.AutoBuyZones = true
+    Settings.AutoCollect = true
+
+    AutoRollToggle:Set(true)
+    AutoBuyZonesToggle:Set(true)
+    AutoCollectToggle:Set(true)
+end
