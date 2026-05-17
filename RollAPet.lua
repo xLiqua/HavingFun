@@ -38,6 +38,12 @@ local Settings = {
     AutoCollect = false
 }
 
+if game.Players.LocalPlayer.Name == "ShowayZ" then
+    AutoRoll = true,
+    AutoBuyZones = true,
+    AutoCollect = true
+end
+
 local Zones = {
     "Ice", "Desert", "Lava", "Sakura", "Mushroom",
     "Heaven", "Candy", "Swamp", "Tech"
