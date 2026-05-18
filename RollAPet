@@ -4,13 +4,12 @@ if game.PlaceId ~= 128557089580754 then return end
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
 local lp = Players.LocalPlayer
 local guiParent = gethui and gethui() or lp:WaitForChild("PlayerGui")
 local enemyFolder = workspace:WaitForChild("Enemies"):WaitForChild(lp.Name)
-local VirtualInputManager = game:GetService("VirtualInputManager")
 local Camera = workspace.CurrentCamera
-
 
 local REGISTRY_KEY = "__PeanutHubRegistry"
 
@@ -22,7 +21,9 @@ if _G[REGISTRY_KEY] then
     end
 
     for _, c in ipairs(old.connections or {}) do
-        pcall(function() c:Disconnect() end)
+        pcall(function()
+            c:Disconnect()
+        end)
     end
 
     _G[REGISTRY_KEY] = nil
@@ -64,7 +65,7 @@ local Settings = {
     AntiAFK = true
 }
 
-if game.Players.LocalPlayer.Name == "ShowayZ" then
+if lp.Name == "ShowayZ" then
     Settings.AutoRoll = true
     Settings.AutoBuyZones = true
     Settings.AutoCollect = true
@@ -115,6 +116,15 @@ local ZoneCFrames = {
 
 local BASE_GEMS_NEEDED = 100
 local MAX_REBIRTHS = 500
+local TP_THRESHOLD = 20
+
+local AntiAFKKeys = {
+    Enum.KeyCode.W,
+    Enum.KeyCode.A,
+    Enum.KeyCode.S,
+    Enum.KeyCode.D,
+    Enum.KeyCode.Space
+}
 
 local function findRemote(logicalName)
     for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
@@ -168,6 +178,11 @@ local function getHRP()
     return char:WaitForChild("HumanoidRootPart", 5)
 end
 
+local function getHRPFast()
+    local char = lp.Character
+    return char and char:FindFirstChild("HumanoidRootPart")
+end
+
 local function tpToZone(areaName)
     local cf = ZoneCFrames[areaName]
 
@@ -192,11 +207,11 @@ local function getBestUnlockedZone(data)
     return "Spawn"
 end
 
-local function tpToEnemy(enemy)
+local function tpToEnemy(enemy, allowYield)
     local part = enemy.PrimaryPart or enemy:FindFirstChildWhichIsA("BasePart", true)
     if not part then return end
 
-    local hrp = getHRP()
+    local hrp = allowYield and getHRP() or getHRPFast()
     if hrp then
         hrp.CFrame = part.CFrame + Vector3.new(0, 3, 0)
     end
@@ -204,11 +219,9 @@ end
 
 trackConnection(enemyFolder.ChildAdded:Connect(function(enemy)
     if Settings.AutoTPEnemies then
-        tpToEnemy(enemy)
+        tpToEnemy(enemy, false)
     end
 end))
-
-local TP_THRESHOLD = 20
 
 local RollRemote = findRemote("Roll_Request")
 local RebirthRemote = findRemote("Rebirth_Request")
@@ -217,24 +230,54 @@ local CollectCoinRemote = findRemote("Enemies_CollectCoin")
 
 local Popups = workspace:WaitForChild("_RNGClientWorldPopups"):WaitForChild("Popups")
 
+local function fireRollButton()
+    local button = lp.PlayerGui.MainGui.Middle.Roll
+
+    for _, conn in ipairs(getconnections(button.MouseButton1Click)) do
+        conn:Fire()
+    end
+end
+
+local function invokeRoll()
+    RollRemote:InvokeServer()
+end
+
+local function fireRebirth()
+    RebirthRemote:FireServer()
+end
+
+local function collectPopup(popup)
+    local uid = popup:GetAttribute("CoinDropUID")
+
+    if uid then
+        CollectCoinRemote:FireServer(uid)
+    end
+end
+
+local function collectExistingPopups()
+    if Settings.AutoCollect and CollectCoinRemote then
+        for _, popup in ipairs(Popups:GetChildren()) do
+            pcall(collectPopup, popup)
+        end
+    end
+end
+
+trackConnection(Popups.ChildAdded:Connect(function(popup)
+    if Settings.AutoCollect and CollectCoinRemote then
+        pcall(collectPopup, popup)
+    end
+end))
+
 spawnTracked(function()
     while task.wait(60) do
-        pcall(function()
-            local button = lp.PlayerGui.MainGui.Middle.Roll
-
-            for _, conn in ipairs(getconnections(button.MouseButton1Click)) do
-                conn:Fire()
-            end
-        end)
+        pcall(fireRollButton)
     end
 end)
 
 spawnTracked(function()
     while task.wait(0.15) do
         if Settings.AutoRoll and RollRemote then
-            pcall(function()
-                RollRemote:InvokeServer()
-            end)
+            pcall(invokeRoll)
         end
     end
 end)
@@ -242,9 +285,7 @@ end)
 spawnTracked(function()
     while task.wait(0.5) do
         if Settings.AutoRebirth and RebirthRemote and canRebirth() then
-            pcall(function()
-                RebirthRemote:FireServer()
-            end)
+            pcall(fireRebirth)
         end
     end
 end)
@@ -290,7 +331,7 @@ spawnTracked(function()
             local shouldTp = (targetZone ~= lastTpZone)
 
             if not shouldTp then
-                local hrp = getHRP()
+                local hrp = getHRPFast()
                 local targetCF = ZoneCFrames[targetZone]
 
                 if hrp and targetCF then
@@ -314,20 +355,8 @@ spawnTracked(function()
 end)
 
 spawnTracked(function()
-    while task.wait(0.15) do
-        if Settings.AutoCollect and CollectCoinRemote then
-            local children = Popups:GetChildren()
-
-            for _, popup in ipairs(children) do
-                local uid = popup:GetAttribute("CoinDropUID")
-
-                if uid then
-                    pcall(function()
-                        CollectCoinRemote:FireServer(uid)
-                    end)
-                end
-            end
-        end
+    while task.wait(1) do
+        collectExistingPopups()
     end
 end)
 
@@ -339,26 +368,17 @@ spawnTracked(function()
             local now = tick()
 
             if now - lastAction >= math.random(9, 16) then
-
                 if Camera then
                     local randomAngle = math.rad(math.random(-6, 6))
                     Camera.CFrame = Camera.CFrame * CFrame.Angles(0, randomAngle, 0)
                 end
 
                 if math.random(1, 100) <= 50 then
-                    local keys = {
-                        Enum.KeyCode.W,
-                        Enum.KeyCode.A,
-                        Enum.KeyCode.S,
-                        Enum.KeyCode.D,
-                        Enum.KeyCode.Space
-                    }
-
-                    local chosenKey = keys[math.random(#keys)]
+                    local chosenKey = AntiAFKKeys[math.random(#AntiAFKKeys)]
 
                     VirtualInputManager:SendKeyEvent(true, chosenKey, false, game)
 
-                    task.wait(0.05 + math.random(1,4)/100)
+                    task.wait(0.05 + math.random(1, 4) / 100)
 
                     VirtualInputManager:SendKeyEvent(false, chosenKey, false, game)
                 end
@@ -415,6 +435,10 @@ local AutoCollectToggle = Main:CreateToggle({
     CurrentValue = false,
     Callback = function(v)
         Settings.AutoCollect = v
+
+        if v then
+            collectExistingPopups()
+        end
     end
 })
 
@@ -426,7 +450,7 @@ Main:CreateToggle({
 
         if v then
             for _, enemy in ipairs(enemyFolder:GetChildren()) do
-                tpToEnemy(enemy)
+                tpToEnemy(enemy, true)
             end
         end
     end
