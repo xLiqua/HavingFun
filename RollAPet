@@ -117,6 +117,8 @@ local ZoneCFrames = {
 local BASE_GEMS_NEEDED = 100
 local MAX_REBIRTHS = 500
 local TP_THRESHOLD = 20
+local AUTO_ROLL_INTERVAL_MIN = 0.25
+local AUTO_ROLL_INTERVAL_MAX = 0.5
 
 local AntiAFKKeys = {
     Enum.KeyCode.W,
@@ -275,9 +277,15 @@ spawnTracked(function()
 end)
 
 spawnTracked(function()
-    while task.wait(0.15) do
+    local rolling = false
+
+    while task.wait(math.random(AUTO_ROLL_INTERVAL_MIN * 100, AUTO_ROLL_INTERVAL_MAX * 100) / 100) do
         if Settings.AutoRoll and RollRemote then
-            pcall(invokeRoll)
+            if not rolling then
+                rolling = true
+                pcall(invokeRoll)
+                rolling = false
+            end
         end
     end
 end)
