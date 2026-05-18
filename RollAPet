@@ -46,7 +46,6 @@ local function trackConnection(conn)
     table.insert(activeConnections, conn)
     return conn
 end
--- ─────────────────────────────────────────────────────────────────────────────
 
 local existingGui = guiParent:FindFirstChild("PeanutCustomUI")
 if existingGui then
@@ -62,7 +61,7 @@ local Settings = {
     AutoBuyZones = true,
     AutoCollect = false,
     AutoTPEnemies = false,
-    AntiAFK = false
+    AntiAFK = true
 }
 
 if game.Players.LocalPlayer.Name == "ShowayZ" then
@@ -203,7 +202,6 @@ local function tpToEnemy(enemy)
     end
 end
 
--- ChildAdded connection is now tracked so it gets disconnected on re-run
 trackConnection(enemyFolder.ChildAdded:Connect(function(enemy)
     if Settings.AutoTPEnemies then
         tpToEnemy(enemy)
@@ -388,7 +386,7 @@ Window:SetTheme("Crimson")
 
 local Main = Window:CreateTab("Main")
 
-Main:CreateToggle({
+local AutoRollToggle = Main:CreateToggle({
     Name = "Auto Roll",
     CurrentValue = false,
     Callback = function(v)
@@ -404,7 +402,7 @@ Main:CreateToggle({
     end
 })
 
-Main:CreateToggle({
+local AutoBuyZonesToggle = Main:CreateToggle({
     Name = "Auto Buy Zones + Smart TP",
     CurrentValue = true,
     Callback = function(v)
@@ -412,7 +410,7 @@ Main:CreateToggle({
     end
 })
 
-Main:CreateToggle({
+local AutoCollectToggle = Main:CreateToggle({
     Name = "Auto Collect",
     CurrentValue = false,
     Callback = function(v)
@@ -434,9 +432,9 @@ Main:CreateToggle({
     end
 })
 
-Main:CreateToggle({
+local AntiAFKToggle = Main:CreateToggle({
     Name = "Anti AFK",
-    CurrentValue = false,
+    CurrentValue = true,
     Callback = function(v)
         Settings.AntiAFK = v
     end
