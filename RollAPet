@@ -11,12 +11,30 @@ local enemyFolder = workspace:WaitForChild("Enemies"):WaitForChild(lp.Name)
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Camera = workspace.CurrentCamera
 
-local existingGui = guiParent:FindFirstChild("PeanutCustomUI")
-if existingGui then
-    existingGui:Destroy()
+
+local REGISTRY_KEY = "__PeanutHubRegistry"
+
+if _G[REGISTRY_KEY] then
+    local old = _G[REGISTRY_KEY]
+
+    for _, t in ipairs(old.threads or {}) do
+        pcall(task.cancel, t)
+    end
+
+    for _, c in ipairs(old.connections or {}) do
+        pcall(function() c:Disconnect() end)
+    end
+
+    _G[REGISTRY_KEY] = nil
 end
 
 local activeThreads = {}
+local activeConnections = {}
+
+_G[REGISTRY_KEY] = {
+    threads = activeThreads,
+    connections = activeConnections,
+}
 
 local function spawnTracked(fn)
     local t = task.spawn(fn)
@@ -24,11 +42,15 @@ local function spawnTracked(fn)
     return t
 end
 
-local function cleanupThreads()
-    for _, t in ipairs(activeThreads) do
-        task.cancel(t)
-    end
-    table.clear(activeThreads)
+local function trackConnection(conn)
+    table.insert(activeConnections, conn)
+    return conn
+end
+-- ─────────────────────────────────────────────────────────────────────────────
+
+local existingGui = guiParent:FindFirstChild("PeanutCustomUI")
+if existingGui then
+    existingGui:Destroy()
 end
 
 local CustomUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/xLiqua/CustomUI/refs/heads/main/CustomUI.lua"))()()
@@ -181,11 +203,12 @@ local function tpToEnemy(enemy)
     end
 end
 
-enemyFolder.ChildAdded:Connect(function(enemy)
+-- ChildAdded connection is now tracked so it gets disconnected on re-run
+trackConnection(enemyFolder.ChildAdded:Connect(function(enemy)
     if Settings.AutoTPEnemies then
         tpToEnemy(enemy)
     end
-end)
+end))
 
 local TP_THRESHOLD = 20
 
