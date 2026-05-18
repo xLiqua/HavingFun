@@ -8,6 +8,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local lp = Players.LocalPlayer
 local guiParent = gethui and gethui() or lp:WaitForChild("PlayerGui")
 local enemyFolder = workspace:WaitForChild("Enemies"):WaitForChild(lp.Name)
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local Camera = workspace.CurrentCamera
 
 local existingGui = guiParent:FindFirstChild("PeanutCustomUI")
 if existingGui then
@@ -36,7 +38,9 @@ local Settings = {
     AutoRoll = false,
     AutoRebirth = false,
     AutoBuyZones = true,
-    AutoCollect = false
+    AutoCollect = false,
+    AutoTPEnemies = false,
+    AntiAFK = false
 }
 
 if game.Players.LocalPlayer.Name == "ShowayZ" then
@@ -306,6 +310,52 @@ spawnTracked(function()
     end
 end)
 
+spawnTracked(function()
+    local lastAction = tick()
+
+    while task.wait(0.8) do
+        if Settings.AntiAFK then
+            local now = tick()
+
+            if now - lastAction >= math.random(9, 16) then
+
+                if Camera then
+                    local randomAngle = math.rad(math.random(-6, 6))
+                    Camera.CFrame = Camera.CFrame * CFrame.Angles(0, randomAngle, 0)
+                end
+
+                if math.random(1, 100) <= 50 then
+                    local keys = {
+                        Enum.KeyCode.W,
+                        Enum.KeyCode.A,
+                        Enum.KeyCode.S,
+                        Enum.KeyCode.D,
+                        Enum.KeyCode.Space
+                    }
+
+                    local chosenKey = keys[math.random(#keys)]
+
+                    VirtualInputManager:SendKeyEvent(true, chosenKey, false, game)
+
+                    task.wait(0.05 + math.random(1,4)/100)
+
+                    VirtualInputManager:SendKeyEvent(false, chosenKey, false, game)
+                end
+
+                if math.random(1, 100) <= 18 then
+                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+
+                    task.wait(0.1)
+
+                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+                end
+
+                lastAction = now
+            end
+        end
+    end
+end)
+
 local Window = CustomUI:CreateWindow({
     Name = "PeanutHub",
     Subtitle = "Auto Roll / Rebirth / Zones / Collect"
@@ -358,6 +408,14 @@ Main:CreateToggle({
                 tpToEnemy(enemy)
             end
         end
+    end
+})
+
+Main:CreateToggle({
+    Name = "Anti AFK",
+    CurrentValue = false,
+    Callback = function(v)
+        Settings.AntiAFK = v
     end
 })
 
