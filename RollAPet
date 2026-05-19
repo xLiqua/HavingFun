@@ -82,7 +82,9 @@ local Zones = {
     "Swamp",
     "Tech",
     "Toy",
-    "Void"
+    "Void",
+    "Farm",
+    "Space"
 }
 
 local ZonePrices = {
@@ -96,7 +98,9 @@ local ZonePrices = {
     Swamp = 2073600000,
     Tech = 18662400000,
     Toy = 167961600000,
-    Void = 1511654400000
+    Void = 1511654400000,
+    Farm = 6500000000000,
+    Space = 50000000000000
 }
 
 local ZoneCFrames = {
@@ -111,7 +115,9 @@ local ZoneCFrames = {
     Swamp = CFrame.new(-1028.66223, 6.01867104, -525.780945),
     Tech = CFrame.new(-1270.89697, 6.02929974, -533.768372),
     Toy = CFrame.new(-1548.08728, 6.01446819, -525.470642),
-    Void = CFrame.new(-1825.01111, 6.01446819, -523.428711)
+    Void = CFrame.new(-1825.01111, 6.01446819, -523.428711),
+    Farm = CFrame.new(-2025.6593, 6.01446819, -528.238586),
+    Space = CFrame.new(-2377.65723, 6.01446724, -523.108948)
 }
 
 local BASE_GEMS_NEEDED = 100
