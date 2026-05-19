@@ -58,6 +58,7 @@ local DataClient = require(ReplicatedStorage.Packages.dataservice).client
 
 local Settings = {
     AutoRoll = false,
+    AutoRollClick = false,
     AutoRebirth = false,
     AutoBuyZones = true,
     AutoCollect = false,
@@ -278,7 +279,9 @@ end))
 
 spawnTracked(function()
     while task.wait(60) do
-        pcall(fireRollButton)
+        if Settings.AutoRollClick then
+            pcall(fireRollButton)
+        end
     end
 end)
 
@@ -428,6 +431,14 @@ local AutoRollToggle = Main:CreateToggle({
     end
 })
 
+local AutoRollClickToggle = Main:CreateToggle({
+    Name = "Auto Roll Click",
+    CurrentValue = false,
+    Callback = function(v)
+        Settings.AutoRollClick = v
+    end
+})
+
 Main:CreateToggle({
     Name = "Auto Rebirth",
     CurrentValue = false,
@@ -480,10 +491,12 @@ local AntiAFKToggle = Main:CreateToggle({
 
 if lp.Name == "ShowayZ" then
     Settings.AutoRoll = true
+    Settings.AutoRollClick = true
     Settings.AutoBuyZones = true
     Settings.AutoCollect = true
 
     AutoRollToggle:Set(true)
+    AutoRollClickToggle:Set(true)
     AutoBuyZonesToggle:Set(true)
     AutoCollectToggle:Set(true)
 end
