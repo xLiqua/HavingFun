@@ -124,8 +124,8 @@ local ZoneCFrames = {
 local BASE_GEMS_NEEDED = 100
 local MAX_REBIRTHS = 500
 local TP_THRESHOLD = 20
-local AUTO_ROLL_INTERVAL_MIN = 0.25
-local AUTO_ROLL_INTERVAL_MAX = 0.5
+local AUTO_ROLL_INTERVAL_MIN = 0.15
+local AUTO_ROLL_INTERVAL_MAX = 0.25
 
 local AntiAFKKeys = {
     Enum.KeyCode.W,
