@@ -278,7 +278,7 @@ trackConnection(Popups.ChildAdded:Connect(function(popup)
 end))
 
 spawnTracked(function()
-    while task.wait(60) do
+    while task.wait(0.15) do
         if Settings.AutoRollClick then
             pcall(fireRollButton)
         end
