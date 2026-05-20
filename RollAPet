@@ -491,12 +491,12 @@ local AntiAFKToggle = Main:CreateToggle({
 
 if lp.Name == "ShowayZ" then
     Settings.AutoRoll = true
-    Settings.AutoRollClick = true
+    Settings.AutoRollClick = false
     Settings.AutoBuyZones = true
     Settings.AutoCollect = true
 
     AutoRollToggle:Set(true)
-    AutoRollClickToggle:Set(true)
+    AutoRollClickToggle:Set(false)
     AutoBuyZonesToggle:Set(true)
     AutoCollectToggle:Set(true)
 end
